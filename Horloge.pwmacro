@@ -1,0 +1,103 @@
+version "5.0"
+#=====================================================
+# ---- InnovMetric Software Inc.
+# ---- Module  :    PolyWorks|Inspector
+# ---- Version :    2020 IR6 (build 4287)
+# ---- Date    :    mercredi 3 février 2021 - 15:55:12
+#-----------------------------------------------------
+DECLARE Pi 3.14159265359
+
+declare mois
+declare jour
+declare annee
+DECLARE hour
+DECLARE minuite
+DECLARE seconde
+
+DECLARE Stop_pg 1
+
+DECLARE c_hour_I
+DECLARE c_hour_J
+
+DECLARE correction_h
+
+DECLARE c_min_I
+DECLARE c_min_J
+
+DECLARE correction_m
+
+DECLARE c_sec_I
+DECLARE c_sec_J
+
+DECLARE Pt_I
+DECLARE Pt_J
+
+
+ 
+FEATURE PRIMITIVE POINT CREATE ( 0.0, 0.0, 0.0, "Nominal", "Centre", )
+FEATURE PRIMITIVE LINE CREATE FROM_ORIGIN_AND_ORIENTATION ( 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 8.0, "Nominal", "hour", )
+FEATURE PRIMITIVE LINE CREATE FROM_ORIGIN_AND_ORIENTATION ( 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 8.0, "Nominal", "min", )
+FEATURE PRIMITIVE LINE CREATE FROM_ORIGIN_AND_ORIENTATION ( 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 8.0, "Nominal", "sec", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 13.0, "Nominal", "cercle ext", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 12.0, "Nominal", "cercle int", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, 6.00, 10.39, 1.0, 0.0, 0.0, 0.5, "Nominal", "1", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, 10.39, 6.0, 1.0, 0.0, 0.0, 0.5, "Nominal", "2", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0,12.00, 0, 1.0, 0.0, 0.0, 0.5, "Nominal", "3", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, 10.39, -6.00, 1.0, 0.0, 0.0, 0.5, "Nominal", "4", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, 6.00, -10.39, 1.0, 0.0, 0.0, 0.5, "Nominal", "5", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, 0.00, -12.0, 1.0, 0.0, 0.0, 0.5, "Nominal", "6", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, -6, -10.39, 1.0, 0.0, 0.0, 0.5, "Nominal", "7", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, -10.39,-6.0, 1.0, 0.0, 0.0, 0.5, "Nominal", "8", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, -12.0, 0, 1.0, 0.0, 0.0, 0.5, "Nominal", "9", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, -10.39, 6, 1.0, 0.0, 0.0, 0.5, "Nominal", "10", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, -6.00, 10.39, 1.0, 0.0, 0.0, 0.5, "Nominal", "11", )
+FEATURE PRIMITIVE CIRCLE CREATE ( 0.0, 0, 12.0, 1.0, 0.0, 0.0, 0.5, "Nominal", "12", )
+
+TREEVIEW FEATURE SELECT RANGE ( 1, 6, "On" )
+TREEVIEW OBJECT PROPERTIES ANNOTATION ( "Off", )
+TREEVIEW OBJECT SELECT NONE
+TREEVIEW FEATURE SELECT RANGE ( 7, 18, "On" )
+TREEVIEW OBJECT PROPERTIES ANNOTATION ( "On", )
+VIEW ANNOTATION OPTIONS POSITIONING MODE ( "Close to object" )
+VIEW ANNOTATION TEMPLATE ASSIGN ( "Name only", "Standard", )
+TREEVIEW OBJECT SELECT NONE
+
+VIEW POSE CENTER
+VIEW POSE X_POS ( "+Z" )
+#calcul trigo coef
+
+
+WHILE $Stop_pg > 0
+    #get time
+    SYSTEM DATE_TIME GET ( annee,mois,jour,hour,minuite,seconde)
+    
+    IF $seconde < 60
+        SET correction_m EXPR ( $seconde/60 )
+    ENDIF
+    if $minuite < 60
+        SET correction_h EXPR ( $minuite/60 )
+    ENDIF
+    
+    SET c_sec_I EXPR ( sin($seconde*6*$Pi/180))
+    SET c_sec_J EXPR ( cos($seconde*6*$Pi/180))
+    
+    SET c_min_I EXPR ( sin(($minuite+$correction_m)*6*$Pi/180))
+    SET c_min_J EXPR ( cos(($minuite+$correction_m)*6*$Pi/180))
+    
+    SET c_hour_I EXPR ( sin(($hour+$correction_h)*30*$Pi/180))
+    SET c_hour_J EXPR ( cos(($hour+$correction_h)*30*$Pi/180))
+    
+    TREEVIEW FEATURE NOMINAL SELECT ( 4, "On" )
+    TREEVIEW PRIMITIVE LINE PROPERTIES ORIENTATION ( , $c_sec_I, $c_sec_J,)
+    TREEVIEW OBJECT SELECT NONE
+    
+    TREEVIEW FEATURE NOMINAL SELECT ( 3, "On" )
+    TREEVIEW PRIMITIVE LINE PROPERTIES ORIENTATION ( , $c_min_I, $c_min_J,)
+    TREEVIEW OBJECT SELECT NONE
+    
+    TREEVIEW FEATURE NOMINAL SELECT ( 2, "On" )
+    TREEVIEW PRIMITIVE LINE PROPERTIES ORIENTATION ( , $c_hour_I, $c_hour_J,)
+    TREEVIEW OBJECT SELECT NONE
+    
+    
+ENDWHILE
